@@ -1,29 +1,31 @@
-import { Document, Schema, model } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IUser extends Document {
-  id: string;
   name: string;
   email: string;
   password: string;
   image?: string;
-  role: string;
-    isVerified: boolean;
+  role: "user" | "admin" | "moderator";
+  isVerified: boolean;
   googleId?: string;
   verificationToken?: string;
   verificationTokenExpires?: Date;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
-
 }
 
-const userSchema = new Schema<IUser>(
+const UserSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    email: { type: String, required: true, unique: true, lowercase: true },
+    password: { type: String, required: true, select: false },
     image: { type: String },
-    role: { type: String, enum: ["customer", "rider","seller","admin"], default: "customer" },
-     isVerified: { type: Boolean, default: false },
+    role: {
+      type: String,
+      enum: ["user", "admin", "moderator"],
+      default: "user",
+    },
+    isVerified: { type: Boolean, default: false },
     googleId: { type: String, unique: true, sparse: true },
     verificationToken: { type: String, select: false },
     verificationTokenExpires: { type: Date, select: false },
@@ -33,5 +35,4 @@ const userSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-const User = model<IUser>("User", userSchema); // <-- this line is the fix
-export default User;
+export default mongoose.model<IUser>("User", UserSchema);

@@ -6,8 +6,6 @@ dist/
 build/
 
 # Environment variables
-.env
-.env.*
 !.env.example
 
 # Logs
@@ -46,3 +44,4 @@ Thumbs.db
 # MongoDB local files (if used)
 data/
 *.db
+config.bat
