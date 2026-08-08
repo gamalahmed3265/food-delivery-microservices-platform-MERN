@@ -1,35 +1,30 @@
 import express from "express";
-import { loginUser, registerUser ,googleAuthCallback} from "../controllers/auth";
 import passport from "passport";
-import "../services/googleAuthService"; // Initialize strategy
+import "../services/googleAuthService";
+import {
+  registerUser,
+  loginUser,
+  verifyEmail,
+  resendVerification,
+  forgotPassword,
+  resetPassword,
+  changePassword,
+  logoutUser,
+  googleAuthCallback,
+} from "../controllers/auth";
+import { protect } from "../middleware/auth";
+
 const router = express.Router();
 
-// @route   Post /api/auth/login
-// @desc    Login user and return JWT token
-// @access  Public
-router.post("/login", loginUser);
-
-// @route   Post /api/auth/register
-// @desc    Register user and return JWT token
-// @access  Public
 router.post("/register", registerUser);
+router.post("/login", loginUser);
+router.get("/verify-email", verifyEmail);
+router.post("/resend-verification", resendVerification);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
+router.get("/google", passport.authenticate("google", { scope: ["profile", "email"], session: false }));
 
-
-// @route   GET /api/auth/google
-// @desc    Initiate Google OAuth
-// @access  Public
-router.get(
-  "/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-    session: false,
-  })
-);
-
-// @route   GET /api/auth/google/callback
-// @desc    Google OAuth callback
-// @access  Public
 router.get(
   "/google/callback",
   passport.authenticate("google", {
@@ -38,5 +33,8 @@ router.get(
   }),
   googleAuthCallback
 );
+
+router.post("/change-password", protect, changePassword);
+router.post("/logout", protect, logoutUser);
 
 export default router;

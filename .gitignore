@@ -6,8 +6,6 @@ dist/
 build/
 
 # Environment variables
-.env
-.env.*
 !.env.example
 
 # Logs
@@ -29,7 +27,6 @@ coverage/
 Thumbs.db
 
 # IDEs
-.vscode/
 .idea/
 
 # Temporary files
@@ -46,3 +43,4 @@ Thumbs.db
 # MongoDB local files (if used)
 data/
 *.db
+config.bat

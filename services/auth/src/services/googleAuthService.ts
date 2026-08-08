@@ -1,5 +1,7 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import User from "../model/User";
 import logger from "../utils/logger";
 
@@ -22,13 +24,12 @@ passport.use(
     async (_accessToken, _refreshToken, profile, done) => {
       try {
         const email = profile.emails?.[0]?.value;
-        const name = profile.displayName;
+        const name = profile.displayName || email?.split("@")[0] || "Google User";
         const image = profile.photos?.[0]?.value;
         const googleId = profile.id;
-        const password="google_oauth_placeholder_password"; // Placeholder password for Google users
 
         if (!email) {
-          return done(new Error("Google account has no email"), false);
+          return done(null, false, { message: "Google account has no email" });
         }
 
         let user = await User.findOne({ email });
@@ -41,19 +42,24 @@ passport.use(
           return done(null, user);
         }
 
+        // Generate dummy password for Google users
+        const dummyPassword = crypto.randomBytes(32).toString("hex");
+        const hashedPassword = await bcrypt.hash(dummyPassword, 10);
+
         user = await User.create({
           name,
           email,
+          password: hashedPassword,
           image,
           googleId,
-          password,
           isVerified: true,
           role: "user",
         });
 
         return done(null, user);
       } catch (error) {
-        return done(error, false);
+        logger.error("Google auth strategy error", { error });
+        return done(error as Error, false);
       }
     }
   )
